@@ -10,6 +10,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { databaseProviders } from './database/database.providers';
 import { MailerModule } from './mailer/mailer.module';
+import { FakerdataModule } from './fakerdata/fakerdata.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MailerModule } from './mailer/mailer.module';
     DatabaseModule,
     VerificationModule,
     MailerModule,
+    FakerdataModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService, ...databaseProviders],
