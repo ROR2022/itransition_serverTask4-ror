@@ -16,8 +16,8 @@ export class FakerdataController {
     ) {
       const count = parseInt(limit, 10) || 20; // default to 20 if not specified
       const errors = parseFloat(errorRate) || 0;
-      const seedValue = parseInt(seed, 10) || Date.now(); // use current time as default seed
       const pageNumber = parseInt(page, 10) || 1;
+      const seedValue = parseInt(seed, 10)+(pageNumber-1) || Date.now(); // use current time as default seed
   
       // Map region to locale
       let locale = 'en_US'; // Default locale

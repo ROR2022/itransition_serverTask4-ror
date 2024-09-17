@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Faker, en, es_MX, de } from '@faker-js/faker';
 
 interface DataFakeUser {
+    index?: number;
     id: string;
     name: string;
     address: string;
@@ -67,6 +68,7 @@ export class FakerdataService {
     
     for (let i = startIndex; i < endIndex; i++) {
       let record:DataFakeUser = {
+        index: (i+1)+(page-1)*recordCount,
         id: this.generateId(),
         name: this.faker.person.fullName(),
         address: this.faker.location.streetAddress(),
