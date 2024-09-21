@@ -1,0 +1,110 @@
+//import { th } from '@faker-js/faker';
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  WebSocketServer,
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { ConfigService } from '@nestjs/config';
+
+@WebSocketGateway({
+  cors: {
+    origin: new ConfigService().get('CLIENT_URL'),
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+})
+export class ChatGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  myClients: any[] = [];
+
+  @WebSocketServer()
+  server: Server;
+
+  afterInit(server: Server) {
+    console.log('WebSocket initialized');
+  }
+
+  handleConnection(client: Socket, ...args: any[]) {
+    console.log(`Client connected: ${client.id}`);
+    this.myClients.push({
+      id: client.id,
+      nickname: '',
+      status: 'online',
+      role: 'viewer',
+      presentationActive: '',
+    });
+  }
+
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected: ${client.id}`);
+    //this.server.emit('left', nickname);
+    const userLeaving = this.myClients.find(
+      (element) => element.id === client.id,
+    );
+    if (userLeaving) {
+      //console.log(`Client ${client.id} left nickname: ${userLeaving.nickname}`);
+      this.myClients = this.myClients.filter(
+        (element) => element.id !== client.id,
+      );
+      this.server.emit('left', this.myClients);
+    }
+  }
+
+  @SubscribeMessage('message')
+  handleMessage(client: Socket, payload: string): string {
+    //console.log(`Received message: ${payload}`);
+    this.server.emit('message', `Hello, you sent -> ${payload}`);
+    return `Hello, you sent -> ${payload}`;
+  }
+
+  @SubscribeMessage('join')
+  handleJoinRoom(client: Socket, dataJoin: string): void {
+    //client.join(nickname);
+    //client.emit('joined', nickname);
+    //console.log(`Client ${client.id} joined data: ${dataJoin}`);
+    const objData = JSON.parse(dataJoin);
+    this.myClients.forEach((element) => {
+      if (element.id === client.id) {
+        element.nickname = objData.nickname;
+        element.presentationActive = objData.presentationActive;
+      }
+    });
+    this.server.emit('joined', this.myClients);
+  }
+
+  @SubscribeMessage('leave')
+  handleLeaveRoom(client: Socket, nickname: string): void {
+    //client.leave(nickname);
+    //client.emit('left', nickname);
+    console.log(`Client ${client.id} left nickname: ${nickname}`);
+    //this.server.emit('left', nickname);
+  }
+
+  @SubscribeMessage('updateParticipant')
+  handleUpdateParticipant(client: Socket, dataUpdateParticipant: string): void {
+    /*
+    console.log(
+      `Client ${client.id} updateParticipant: ${dataUpdateParticipant}`,
+    );
+    */
+    const objData = JSON.parse(dataUpdateParticipant);
+    this.myClients.forEach((element) => {
+      if (element.nickname === objData.nickname) {
+        element.role = objData.role;
+      }
+    });
+    this.server.emit('updatedParticipant', this.myClients);
+  }
+
+  @SubscribeMessage('getDataSlide')
+  handleGetDataSlide(client: Socket, dataReload: string): void {
+    //console.log(`Client ${client.id} getDataSlide: ${dataReload}`);
+
+    this.server.emit('fetchDataSlide', dataReload);
+  }
+}

@@ -11,6 +11,10 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { databaseProviders } from './database/database.providers';
 import { MailerModule } from './mailer/mailer.module';
 import { FakerdataModule } from './fakerdata/fakerdata.module';
+import { PresentationModule } from './presentation/presentation.module';
+import { SlideModule } from './slide/slide.module';
+import { TextblockModule } from './textblock/textblock.module';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
@@ -33,9 +37,12 @@ import { FakerdataModule } from './fakerdata/fakerdata.module';
     VerificationModule,
     MailerModule,
     FakerdataModule,
+    PresentationModule,
+    SlideModule,
+    TextblockModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService, ...databaseProviders],
+  providers: [AppService, JwtService, ...databaseProviders, ChatGateway],
   exports: [JwtService],
 })
 export class AppModule {}
