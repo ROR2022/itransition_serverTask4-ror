@@ -107,4 +107,11 @@ export class ChatGateway
 
     this.server.emit('fetchDataSlide', dataReload);
   }
+
+  @SubscribeMessage('reloadDataPresentation')
+  handleReloadDataPresentation(client: Socket, presentationId: string): void {
+    //console.log(`Client ${client.id} reloadDataPresentation: ${dataReload}`);
+
+    this.server.emit('fetchDataPresentation', presentationId);
+  }
 }
