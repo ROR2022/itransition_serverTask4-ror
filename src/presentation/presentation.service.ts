@@ -26,7 +26,7 @@ export class PresentationService {
 
   findOne(id: string) {
     //return `This action returns a #${id} presentation`;
-    return this.presentationModel.findById(id).exec();
+    return this.presentationModel.findById(id).populate('slides').exec();
   }
 
   update(id: string, updatePresentationDto: UpdatePresentationDto) {
