@@ -25,7 +25,7 @@ export class SlideService {
 
   findOne(id: string) {
     //return `This action returns a #${id} slide`;
-    return this.slideModel.findById(id).populate('textblocks').exec();
+    return this.slideModel.findById(id).populate(['textblocks','presentationId']).exec();
   }
 
   update(id: string, updateSlideDto: UpdateSlideDto) {
