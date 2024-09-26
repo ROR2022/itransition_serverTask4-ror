@@ -6,9 +6,17 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ConfigService } from '@nestjs/config';
+import { ParticipantService } from './participant/participant.service';
+
+interface IDataMessage {
+  sender: string;
+  reciver: string;
+  message: string;
+}
 
 @WebSocketGateway({
   cors: {
@@ -22,15 +30,20 @@ export class ChatGateway
 {
   myClients: any[] = [];
 
+  // eslint-disable-next-line
+  constructor(private readonly participantService: ParticipantService) {}
+
+
   @WebSocketServer()
   server: Server;
 
   afterInit(server: Server) {
-    console.log('WebSocket initialized');
+    console.log('WebSocket initialized', server);
   }
 
   handleConnection(client: Socket, ...args: any[]) {
     console.log(`Client connected: ${client.id}`);
+    console.log('client args: ', args);
     this.myClients.push({
       id: client.id,
       nickname: '',
@@ -48,6 +61,7 @@ export class ChatGateway
     );
     if (userLeaving) {
       //console.log(`Client ${client.id} left nickname: ${userLeaving.nickname}`);
+      this.participantService.updateByNickname(userLeaving.nickname, {online: false});
       this.myClients = this.myClients.filter(
         (element) => element.id !== client.id,
       );
@@ -56,17 +70,27 @@ export class ChatGateway
   }
 
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: string): string {
-    //console.log(`Received message: ${payload}`);
-    this.server.emit('message', `Hello, you sent -> ${payload}`);
-    return `Hello, you sent -> ${payload}`;
+  handleMessage(client: Socket, payload: IDataMessage): void {
+    console.log(`Received message: ${payload}`);
+    const objDataMsg = payload;
+    //console.log('objData: ', objDataMsg);
+    const { reciver } = objDataMsg;
+    //console.log('reciver: ', reciver);
+    //console.log('My clients: ', this.myClients);
+    const findReciver = this.myClients.find((element) => element.nickname === reciver);
+    if(findReciver){
+      //console.log(`Reciver found: ${findReciver.nickname}`);
+      this.server.to(findReciver.id).emit('messageRecived', JSON.stringify(objDataMsg));
+    }
+    //this.server.emit('message', `Hello, you sent -> ${payload}`);
+    //return `Hello, you sent -> ${payload}`;
   }
 
   @SubscribeMessage('join')
   handleJoinRoom(client: Socket, dataJoin: string): void {
     //client.join(nickname);
     //client.emit('joined', nickname);
-    //console.log(`Client ${client.id} joined data: ${dataJoin}`);
+    console.log(`Client ${client.id} joined data: ${dataJoin}`);
     const objData = JSON.parse(dataJoin);
     this.myClients.forEach((element) => {
       if (element.id === client.id) {
@@ -114,4 +138,23 @@ export class ChatGateway
 
     this.server.emit('fetchDataPresentation', presentationId);
   }
+
+  @SubscribeMessage('call-user')
+  handleCallUser(client: Socket, data: any, ): void {
+    console.log('Call-user data: ', data);
+    console.log('Call-user client: ', client.id);
+    const to= this.myClients.find((element) => element.nickname === data.reciver).id;
+    //const { signal, to } = data;
+    this.server.to(to).emit('call-made', { signal:data.signal, sender: data.sender, reciver: data.reciver });
+  }
+
+  @SubscribeMessage('answer-call')
+  handleAnswerCall(client: Socket, data: any ): void {
+    console.log('Answer-call data: ', data);
+    console.log('Answer-call client: ', client);
+    const to= this.myClients.find((element) => element.nickname === data.sender).id;
+    //const { signal, to } = data;
+    this.server.to(to).emit('call-answered', { signal:data.signal, sender: data.sender, reciver: data.reciver });
+  }
+
 }

@@ -15,6 +15,9 @@ import { PresentationModule } from './presentation/presentation.module';
 import { SlideModule } from './slide/slide.module';
 import { TextblockModule } from './textblock/textblock.module';
 import { ChatGateway } from './chat.gateway';
+import { ParticipantModule } from './participant/participant.module';
+import { ConversationModule } from './conversation/conversation.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
@@ -40,6 +43,9 @@ import { ChatGateway } from './chat.gateway';
     PresentationModule,
     SlideModule,
     TextblockModule,
+    ParticipantModule,
+    ConversationModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService, ...databaseProviders, ChatGateway],
