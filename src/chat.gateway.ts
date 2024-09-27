@@ -38,7 +38,7 @@ export class ChatGateway
   server: Server;
 
   afterInit(server: Server) {
-    console.log('WebSocket initialized', server);
+    console.log('WebSocket initialized', server._opts);
   }
 
   handleConnection(client: Socket, ...args: any[]) {
@@ -155,6 +155,14 @@ export class ChatGateway
     const to= this.myClients.find((element) => element.nickname === data.sender).id;
     //const { signal, to } = data;
     this.server.to(to).emit('call-answered', { signal:data.signal, sender: data.sender, reciver: data.reciver });
+  }
+
+  @SubscribeMessage('image-message')
+  handleImageMessage(client: Socket, data: any): void {
+    //console.log('Image-message data: ', data);
+    //console.log('Image-message client: ', client);
+    const to= this.myClients.find((element) => element.nickname === data.reciver).id;
+    this.server.to(to).emit('image-message-recived', data);
   }
 
 }
