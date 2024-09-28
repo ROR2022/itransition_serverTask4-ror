@@ -8,6 +8,9 @@ export class Message {
   @Prop({ required: true })
   message: string;
 
+  @Prop()
+  type: string;
+
   @Prop({ type: mongo.ObjectId, ref: 'Participant' })
   sender: string;
 
