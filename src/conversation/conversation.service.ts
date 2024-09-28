@@ -30,9 +30,11 @@ export class ConversationService {
     return this.conversationModel.findById(id).populate(['participants','messages']).exec();
   }
 
-  findByParticipantId(participantId: string) {
+  async findByParticipantId(participantId: string) {
     //return `This action returns a conversation with participantId ${participantId}`;
-    return this.conversationModel.find({participants: participantId}).populate(['participants','messages']).exec();
+    const result= await this.conversationModel.find({participants: participantId}).populate(['participants','messages']).exec();
+    console.log('findByParticipantId result:...', result);
+    return result
   }
 
   update(id: string, updateConversationDto: UpdateConversationDto) {

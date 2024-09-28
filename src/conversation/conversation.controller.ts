@@ -25,6 +25,7 @@ export class ConversationController {
 
   @Get('byParticipantId/:participantId')
   findByParticipantId(@Param('participantId') participantId: string) {
+    console.log('participantId:...', participantId);
     return this.conversationService.findByParticipantId(participantId);
   }
 
