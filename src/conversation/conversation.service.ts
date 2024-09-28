@@ -34,20 +34,25 @@ export class ConversationService {
   }
 
   async findByParticipantId(participantId: string) {
-    //return `This action returns a conversation with participantId ${participantId}`;
+    if(!participantId){
+      return {error: 'Participant id is required'};
+    }
+    
     const isParticipantExist = await this.participantService.findOne(participantId);
     if(!isParticipantExist){
       return {error: 'No participant found with this id'};
     }
-    const isParticipantIdValid = await this.conversationModel.find({participants:{$in:[participantId]}}).populate(['participants','messages']).exec();
-    //const result= await this.conversationModel.find({participants:{$in:[/partici/]}}).populate(['participants','messages']).exec();
-    console.log('findByParticipantId result:...', isParticipantIdValid);
-    if(isParticipantIdValid.length>0){
-      return isParticipantIdValid;
-    }else{
-      return {error: 'No conversation found with this participantId'};
+    const conversations:any = await this.conversationModel
+    .find({participants:{$in:[participantId]}})
+    .populate(['participants','messages']);
+
+    //console.log('findByParticipantId  conversations:...', conversations);
+    if (!conversations || conversations.length === 0) {
+      return { error: 'No conversations found for this participant' };
     }
-  }
+
+    return conversations
+    }
 
   update(id: string, updateConversationDto: UpdateConversationDto) {
     //return `This action updates a #${id} conversation`;

@@ -6,7 +6,6 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ConfigService } from '@nestjs/config';
@@ -43,7 +42,7 @@ export class ChatGateway
 
   handleConnection(client: Socket, ...args: any[]) {
     console.log(`Client connected: ${client.id}`);
-    console.log('client args: ', args);
+    //console.log('client args: ', args);
     this.myClients.push({
       id: client.id,
       nickname: '',

@@ -8,7 +8,7 @@ export class Conversation {
   @Prop({ type: [mongo.ObjectId], ref: 'Participant' })
   participants: string[];
 
-  @Prop({ type: [mongo.ObjectId], ref: 'Message' })
+  @Prop({ type: [mongo.ObjectId], ref: 'Message', default: [] })
   messages: string[];
 
   @Prop()
