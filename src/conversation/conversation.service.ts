@@ -3,6 +3,8 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { Model } from 'mongoose';
 import { Conversation } from './entities/conversation.entity';
+import { ParticipantService } from 'src/participant/participant.service';
+//import { error } from 'console';
 
 @Injectable()
 export class ConversationService {
@@ -11,6 +13,7 @@ export class ConversationService {
     // eslint-disable-next-line
     @Inject('CONVERSATION_MODEL')
     private conversationModel: Model<Conversation>,
+    private participantService: ParticipantService,
   ) {}
 
   async create(createConversationDto: CreateConversationDto) {
@@ -32,9 +35,18 @@ export class ConversationService {
 
   async findByParticipantId(participantId: string) {
     //return `This action returns a conversation with participantId ${participantId}`;
-    const result= await this.conversationModel.find({participants: participantId}).populate(['participants','messages']).exec();
-    console.log('findByParticipantId result:...', result);
-    return result
+    const isParticipantExist = await this.participantService.findOne(participantId);
+    if(!isParticipantExist){
+      return {error: 'No participant found with this id'};
+    }
+    const isParticipantIdValid = await this.conversationModel.find({participants:{$in:[participantId]}}).populate(['participants','messages']).exec();
+    //const result= await this.conversationModel.find({participants:{$in:[/partici/]}}).populate(['participants','messages']).exec();
+    console.log('findByParticipantId result:...', isParticipantIdValid);
+    if(isParticipantIdValid.length>0){
+      return isParticipantIdValid;
+    }else{
+      return {error: 'No conversation found with this participantId'};
+    }
   }
 
   update(id: string, updateConversationDto: UpdateConversationDto) {
