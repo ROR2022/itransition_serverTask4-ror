@@ -106,7 +106,10 @@ export class ChatGateway
     //client.leave(nickname);
     //client.emit('left', nickname);
     console.log(`Client ${client.id} left nickname: ${nickname}`);
-    //this.server.emit('left', nickname);
+    this.myClients = this.myClients.filter(
+      (element) => element.nickname !== nickname,
+    );
+    this.server.emit('updatedParticipant', this.myClients);
   }
 
   @SubscribeMessage('updateParticipant')
