@@ -28,9 +28,21 @@ export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   myClients: any[] = [];
+  myUsersOnline: string[] = [];
 
   // eslint-disable-next-line
-  constructor(private readonly participantService: ParticipantService) {}
+  constructor(private readonly participantService: ParticipantService) {
+    const tempOnline = this.participantService.findAllParticipantsOnline();
+    tempOnline.then((res) => {
+      this.myUsersOnline = res.map((element) => element.nickname);
+      res.forEach((element:any) => {
+        const findClient = this.myClients.find(myclient=> myclient.nickname === element.nickname);
+        if(findClient){
+          findClient.online = true;
+        }
+      });
+      });
+  }
 
 
   @WebSocketServer()
@@ -47,6 +59,7 @@ export class ChatGateway
       id: client.id,
       nickname: '',
       status: 'online',
+      online: true,
       role: 'viewer',
       presentationActive: '',
     });
@@ -92,13 +105,29 @@ export class ChatGateway
     console.log('New participant: ');
     console.log(`Client ${client.id} joined data: ${dataJoin}`);
     const objData = JSON.parse(dataJoin);
+    const foundClient = this.myClients.find(myclient=> myclient.id === client.id);
+    if(!foundClient){
+      this.myClients.push({
+        id: client.id,
+        nickname: objData.nickname,
+        status: 'online',
+        online: true,
+        role: 'viewer',
+        presentationActive: objData.presentationActive || '',
+      });
+    }
     this.myClients.forEach((element) => {
       if (element.id === client.id) {
         element.nickname = objData.nickname;
+        element.online = true;
         element.presentationActive = objData.presentationActive;
       }
     });
+    const clientsOnline = this.myClients.filter((element) => element.online);
+    console.log('Clients online: ', clientsOnline);
+
     this.server.emit('joined', this.myClients);
+    this.server.emit('updatedParticipant', this.myClients);
   }
 
   @SubscribeMessage('leave')

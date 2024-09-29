@@ -24,6 +24,11 @@ export class ParticipantService {
     return this.participantModel.find().exec();
   }
 
+  findAllParticipantsOnline() {
+    //return `This action returns all participant online`;
+    return this.participantModel.find({status: 'online'}).exec();
+  }
+
   findOne(id: string) {
     //return `This action returns a #${id} participant`;
     return this.participantModel.findById(id).exec();
