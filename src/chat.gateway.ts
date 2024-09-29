@@ -89,6 +89,7 @@ export class ChatGateway
   handleJoinRoom(client: Socket, dataJoin: string): void {
     //client.join(nickname);
     //client.emit('joined', nickname);
+    console.log('New participant: ');
     console.log(`Client ${client.id} joined data: ${dataJoin}`);
     const objData = JSON.parse(dataJoin);
     this.myClients.forEach((element) => {
