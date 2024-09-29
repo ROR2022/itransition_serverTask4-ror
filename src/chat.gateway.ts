@@ -86,13 +86,16 @@ export class ChatGateway
     console.log(`Received message: ${payload}`);
     const objDataMsg = payload;
     //console.log('objData: ', objDataMsg);
-    const { reciver } = objDataMsg;
-    //console.log('reciver: ', reciver);
+    const { reciver, sender } = objDataMsg;
+    console.log('reciver: ', reciver);
+    console.log('sender: ', sender);
     //console.log('My clients: ', this.myClients);
     const findReciver = this.myClients.find((element) => element.nickname === reciver);
     if(findReciver){
       //console.log(`Reciver found: ${findReciver.nickname}`);
       this.server.to(findReciver.id).emit('messageRecived', JSON.stringify(objDataMsg));
+    }else{
+      console.log(`Reciver not found: ${reciver}`);
     }
     //this.server.emit('message', `Hello, you sent -> ${payload}`);
     //return `Hello, you sent -> ${payload}`;
